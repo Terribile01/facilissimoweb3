@@ -77,8 +77,6 @@ app.post('/api/chat', async (req, res) => {
       systemInstruction: SYSTEM_INSTRUCTION
     });
 
-    // Format history for Gemini chat
-    // The last message is the current user prompt
     const history = messages.slice(0, -1).map((m: any) => ({
       role: m.role === 'user' ? 'user' : 'model',
       parts: [{ text: m.content }]
@@ -97,7 +95,6 @@ app.post('/api/chat', async (req, res) => {
     return res.json({ reply: replyText });
   } catch (error: any) {
     console.error('Gemini API Error:', error);
-    // Graceful fallback during API failure
     const lastUserMessage = messages[messages.length - 1]?.content || '';
     return res.json({
       reply: simulateServiceChat(lastUserMessage) + " (Servizio attivo in modalità di riserva locale)",
@@ -106,10 +103,8 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-// local simulation logic for extreme resilience
 function simulateServiceChat(input: string): string {
   const query = input.toLowerCase();
-
   if (query.includes('ciao') || query.includes('buongiorno') || query.includes('salve')) {
     return "Ciao! Sono l'assistente virtuale di FacilissimoWeb. Sono qui per aiutarti a capire come abbattere le barriere digitali della tua attività tramite siti web strategici o automazioni con Zapier, Make e AI. Come ti chiami e che tipo di business gestisci?";
   }
@@ -125,29 +120,34 @@ function simulateServiceChat(input: string): string {
   if (query.includes('chi sei') || query.includes('maria') || query.includes('teresa') || query.includes('storia')) {
     return "Maria Teresa è la fondatrice di FacilissimoWeb! Ha unito la sua passione per l'informatica ed il design grafico per dare vita a metodologie rigorose ma empatiche per i micro-imprenditori. Scopri di più sulla sua storia alla pagina **Chi Sono**!";
   }
-
   return "Capisco perfettamente! L'automazione e il web design sono pilastri cruciali per scalare la tua attività senza dedicare ore alle fatiche ripetitive. Ti invito a dare un'occhiata alla pagina **Servizi** o a scriverci direttamente dalla pagina **Contatti** per pianificare una call strategica gratuita!";
 }
 
-// Vite integration
-async function startServer() {
-  if (process.env.NODE_ENV !== 'production') {
+// VERCEL COMPATIBILITY:
+// Only start the server with app.listen() if we're not running as a Vercel function.
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  async function startDevServer() {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
     });
     app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server FacilissimoWeb running on port ${PORT}`);
     });
   }
-
+  startDevServer();
+} else if (!process.env.VERCEL) {
+  // Production standalone (not Vercel)
+  const distPath = path.join(process.cwd(), 'dist');
+  app.use(express.static(distPath));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server FacilissimoWeb running on port ${PORT}`);
   });
 }
 
-startServer();
+// Export for Vercel
+export default app;
