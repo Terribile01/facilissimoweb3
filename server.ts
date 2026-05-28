@@ -15,8 +15,9 @@ const PORT = 3000;
 let genAI: GoogleGenerativeAI | null = null;
 const getGenAI = (): GoogleGenerativeAI | null => {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    console.warn("GEMINI_API_KEY missing - system operates in smart local simulation mode.");
+  // Basic validation to check if it's a real-looking key (Gemini keys usually start with AIza)
+  if (!apiKey || apiKey === 'MY_GEMINI_API_KEY' || apiKey.length < 20) {
+    console.warn("GEMINI_API_KEY missing or invalid - system operates in smart local simulation mode.");
     return null;
   }
   if (!genAI) {
