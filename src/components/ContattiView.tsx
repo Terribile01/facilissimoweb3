@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Mail, MapPin, Clock, Send, Linkedin, Instagram, Github, 
-  CheckCircle2, Info, Star, Sparkles, Brain, Workflow, Pocket 
+  CheckCircle2, Info, Star, Sparkles, Brain, Workflow, Pocket,
+  Phone
 } from 'lucide-react';
+import emailjs from '@emailjs/browser';
 
 export default function ContattiView() {
+  const form = useRef<HTMLFormElement>(null);
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
@@ -49,12 +52,24 @@ export default function ContattiView() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Simulate real network submission
-    setTimeout(() => {
+
+    if (!form.current) return;
+
+    emailjs.sendForm(
+      'service_e6y0dfs',
+      'template_yjw349w',
+      form.current,
+      'gVH02EFjxhWU26obx'
+    )
+    .then(() => {
       setLoading(false);
       setSubmitted(true);
-    }, 1500);
+    })
+    .catch((error) => {
+      console.error('EmailJS Error:', error);
+      setLoading(false);
+      alert("Si è verificato un errore durante l'invio. Riprova più tardi o contattaci telefonicamente.");
+    });
   };
 
   const { hoursSaved, durationWeeks, levelOfAutomation } = calculateEstimate();
@@ -90,14 +105,16 @@ export default function ContattiView() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
-            {/* Card 1 */}
+            {/* Card 1 - Phone */}
             <div className="bg-[#FAF8F5] border border-[#1A1A1A]/10 rounded-2xl p-5 flex items-start space-x-4">
               <div className="w-10 h-10 rounded-full bg-[#1A1A1A]/5 flex items-center justify-center text-[#8B7E66] shrink-0 border border-[#1A1A1A]/5">
-                <Mail className="w-5 h-5" />
+                <Phone className="w-5 h-5" />
               </div>
               <div className="flex flex-col text-left">
-                <span className="text-[9px] uppercase font-mono tracking-widest text-zinc-400">Canale Diretto</span>
-                <span className="text-[#1A1A1A] font-bold text-sm mt-1">info@facilissimoweb.it</span>
+                <span className="text-[9px] uppercase font-mono tracking-widest text-zinc-400">Contatto Diretto</span>
+                <a href="tel:+393791038253" className="text-[#1A1A1A] font-bold text-sm mt-1 hover:text-[#8B7E66] transition-colors">
+                  +39 379 103 8253
+                </a>
               </div>
             </div>
 
@@ -165,7 +182,7 @@ export default function ContattiView() {
           {/* Main Module Panel */}
           <div className="bg-[#FAF8F5] border border-[#1A1A1A]/10 rounded-3xl p-6 sm:p-10 shadow-md">
             {!submitted ? (
-              <form onSubmit={handleSubmit} className="space-y-6 text-left" id="contact-calculator-form">
+              <form ref={form} onSubmit={handleSubmit} className="space-y-6 text-left" id="contact-calculator-form">
                 
                 {/* Visual form header */}
                 <div className="flex items-center space-x-3.5 pb-4 border-b border-[#1A1A1A]/10">

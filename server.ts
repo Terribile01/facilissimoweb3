@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import dotenv from 'dotenv';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { createServer as createViteServer } from 'vite';
 
 dotenv.config();
@@ -12,21 +12,21 @@ app.use(express.json());
 const PORT = 3000;
 
 // Lazy initialization of Gemini client
-let aiClient: GoogleGenAI | null = null;
-const getAIClient = (): GoogleGenAI | null => {
+let genAI: GoogleGenerativeAI | null = null;
+const getGenAI = (): GoogleGenerativeAI | null => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     console.warn("GEMINI_API_KEY missing - system operates in smart local simulation mode.");
     return null;
   }
-  if (!aiClient) {
+  if (!genAI) {
     try {
-      aiClient = new GoogleGenAI({ apiKey });
+      genAI = new GoogleGenerativeAI(apiKey);
     } catch (e) {
-      console.error("Failed to initialize GoogleGenAI client:", e);
+      console.error("Failed to initialize GoogleGenerativeAI client:", e);
     }
   }
-  return aiClient;
+  return genAI;
 };
 
 // System prompt instructing the AI how to act as Maria Teresa's AI Assistant for FacilissimoWeb
@@ -62,7 +62,7 @@ app.post('/api/chat', async (req, res) => {
     return res.status(400).json({ error: 'Messaggi mancanti o non validi.' });
   }
 
-  const ai = getAIClient();
+  const ai = getGenAI();
   if (!ai) {
     // Elegant Simulation fallback response
     const lastUserMessage = messages[messages.length - 1]?.content || '';
@@ -71,23 +71,28 @@ app.post('/api/chat', async (req, res) => {
   }
 
   try {
-    // Format messages for @google/genai format
-    // Map current chat window dialogue to Gemini format
-    const formattedHistory = messages.map((m: any) => ({
+    const model = ai.getGenerativeModel({
+      model: 'gemini-1.5-flash',
+      systemInstruction: SYSTEM_INSTRUCTION
+    });
+
+    // Format history for Gemini chat
+    // The last message is the current user prompt
+    const history = messages.slice(0, -1).map((m: any) => ({
       role: m.role === 'user' ? 'user' : 'model',
       parts: [{ text: m.content }]
     }));
 
-    // Generate content using gemini-2.5-flash
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: [
-        { role: 'user', parts: [{ text: SYSTEM_INSTRUCTION }] },
-        ...formattedHistory
-      ]
+    const lastMessage = messages[messages.length - 1].content;
+
+    const chat = model.startChat({
+      history: history,
     });
 
-    const replyText = response.text || "Mi scuso, ho riscontrato un piccolo imprevisto nell'elaborare la risposta. Come posso aiutarti di persona?";
+    const result = await chat.sendMessage(lastMessage);
+    const response = await result.response;
+    const replyText = response.text();
+
     return res.json({ reply: replyText });
   } catch (error: any) {
     console.error('Gemini API Error:', error);
