@@ -88,7 +88,7 @@ export default function ChatWidget() {
       const errorMsg: ChatMessage = {
         id: Math.random().toString(),
         sender: 'ai',
-        text: "Scusami, ho riscontrato una leggera interruzione nella connessione. Puoi scriverci direttamente a info@facilissimoweb.it o compilare il form di contatto per ricevere un aiuto immediato!",
+        text: "Scusami, ho riscontrato una leggera interruzione nella connessione. Puoi scriverci direttamente tramite il form di contatto per ricevere un aiuto immediato!",
         timestamp: new Date()
       };
       setMessages((prev) => [...prev, errorMsg]);

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, ArrowUpRight, Zap } from 'lucide-react';
+import { Menu, X, ArrowUpRight, Zap, Phone } from 'lucide-react';
 import { Page } from '../types';
 
 interface NavbarProps {
@@ -69,7 +69,14 @@ export default function Navbar({ currentPage, setCurrentPage }: NavbarProps) {
           </div>
 
           {/* CTA Button */}
-          <div className="hidden md:flex items-center">
+          <div className="hidden md:flex items-center space-x-4">
+            <a
+              href="tel:+393791038253"
+              className="font-sans text-[11px] uppercase tracking-[0.18em] font-semibold text-[#1A1A1A] hover:text-[#8B7E66] transition-all duration-300 flex items-center space-x-2"
+            >
+              <Phone className="w-4 h-4 text-[#8B7E66]" />
+              <span>379 103 8253</span>
+            </a>
             <button
               id="nav-cta-btn"
               onClick={() => handleNavigate('contatti')}
@@ -113,7 +120,14 @@ export default function Navbar({ currentPage, setCurrentPage }: NavbarProps) {
                 <span className={`w-1.5 h-1.5 rounded-full ${currentPage === link.value ? 'bg-[#8B7E66]' : 'bg-transparent'}`} />
               </button>
             ))}
-            <div className="pt-4 px-4">
+            <div className="pt-4 px-4 space-y-4">
+              <a
+                href="tel:+393791038253"
+                className="flex w-full items-center justify-center space-x-2 text-[#1A1A1A] font-sans text-xs uppercase tracking-widest font-semibold py-2"
+              >
+                <Phone className="w-4 h-4 text-[#8B7E66]" />
+                <span>Chiama Ora: 379 103 8253</span>
+              </a>
               <button
                 id="mobile-nav-cta"
                 onClick={() => handleNavigate('contatti')}

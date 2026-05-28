@@ -59,9 +59,9 @@ export default function Footer({ setCurrentPage, onOpenCookieBanner }: FooterPro
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[#FAF8F5]/50 font-mono text-[9px] uppercase tracking-widest">Sviluppo & Automazione: Remoto / Macerata</span>
               </span>
-              <a href="mailto:info@facilissimoweb.it" className="text-zinc-300 hover:text-[#8B7E66] transition-colors duration-200">
-                info@facilissimoweb.it
-              </a>
+              <span className="text-zinc-300">
+                Contattaci tramite il modulo dedicato
+              </span>
             </div>
           </div>
 
